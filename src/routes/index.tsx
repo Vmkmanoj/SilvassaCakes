@@ -27,7 +27,7 @@ const dishes = [
   { image: ducknoodle, price: "$5", title: "Duck Noodles" },
   { image: chickensalad, price: "$10", title: "Grilled Chicken Salad" },
   { image: spaghetti, price: "$22", title: "Spaghetti Carbonara" },
-  { image: blackpasta,  price: "$22", title: "Black Pasta Shrimp" },
+  { image: blackpasta, price: "$22", title: "Black Pasta Shrimp" },
   { image: strawberries, price: "$5", title: "Strawberries Arnaud" },
   { image: thaichicken, price: "$20", title: "Thai Chicekn" },
   { image: pancakes, price: "$10", title: "Pancakes" },
@@ -77,7 +77,7 @@ function Index() {
         <img src={poster} alt="" id="poster" />
       </div>
 
-      <nav>
+      {/* <nav>
         <i className="bi menu bi-list"></i>
         <div className="right_menu">
           <ul>
@@ -93,15 +93,15 @@ function Index() {
             </div>
           </div>
         </div>
-      </nav>
-
+      </nav> */}
+      {/* 
       <div className="left_menu">
         <a href="#">Process</a>
         <a href="#">Design</a>
         <a href="#">Material</a>
-      </div>
+      </div> */}
 
-      <section>
+      <section style={{ marginTop: "45px" }}>
         <div className="content">
           <h1 id="title">{title}</h1>
           <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus praesentium distinctio a accusamus illum autem. Dicta maiores incidunt eum dolores!</p>
@@ -110,11 +110,11 @@ function Index() {
               <h2 id="price_cont">{price}</h2>
               <p>total payable</p>
             </div>
-            <a href="#">Order Now</a>
+            <a href="tel:+919487255660">Enquiry Now</a>
           </div>
         </div>
 
-        <div className="cards" ref={cardsRef}>
+        <div className="cards" style={{ marginLeft: "13px" }} ref={cardsRef}>
           {dishes.map((dish) => (
             <div className="card" key={dish.title} onClick={() => selectDish(dish)}>
               <img src={dish.image} alt="" className="dis" />
@@ -135,9 +135,9 @@ function Index() {
             <i className="bi bi-arrow-right-circle-fill" onClick={() => { if (cardsRef.current) cardsRef.current.scrollLeft += 140; }}></i>
           </div>
           <div className="icons">
-            <a href="#"><i className="bi bi-facebook"></i></a>
+            {/* <a href="#"><i className="bi bi-facebook"></i></a> */}
             <a href="#"><i className="bi bi-instagram"></i></a>
-            <a href="#"><i className="bi bi-tiktok"></i></a>
+            {/* <a href="#"><i className="bi bi-tiktok"></i></a> */}
           </div>
         </div>
       </section>
