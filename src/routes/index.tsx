@@ -1,46 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useRef, useState, useEffect } from "react";
+import { fetchProducts } from "../services/api";
+import type { Product } from "../types/product";
 
-// import blackPasta from "../assets/food-menu/blackpasta.png.asset.json";
-// import chickenSalad from "../assets/food-menu/chickensalad.png.asset.json";
-// import duckNoodle from "../assets/food-menu/ducknoodle.png.asset.json";
-// import pancakes from "../assets/food-menu/pancakes.png.asset.json";
-// import spaghetti from "../assets/food-menu/spaghetti.png.asset.json";
-// import steak from "../assets/food-menu/steak.png.asset.json";
-// import strawberries from "../assets/food-menu/strawberries.png.asset.json";
-// import thaiChicken from "../assets/food-menu/thaichicken.png.asset.json";
-// import waffles from "../assets/food-menu/waffles.png.asset.json";
-
-import steak from "../../public/img/steak.png"
-import thaichicken from "../../public/img/thaichicken.png"
-import pancakes from "../../public/img/pancakes.png"
-import spaghetti from "../../public/img/spaghetti.png"
-import waffles from "../../public/img/waffles.png"
-import blackpasta from "../../public/img/blackpasta.png"
-import strawberries from "../../public/img/strawberries.png"
-import ducknoodle from "../../public/img/ducknoodle.png"
-import chickensalad from "../../public/img/chickensalad.png"
-
-
-const dishes = [
-  { image: steak, price: "$10", title: "Grilled Beef Steak" },
-  { image: ducknoodle, price: "$5", title: "Duck Noodles" },
-  { image: chickensalad, price: "$10", title: "Grilled Chicken Salad" },
-  { image: spaghetti, price: "$22", title: "Spaghetti Carbonara" },
-  { image: blackpasta, price: "$22", title: "Black Pasta Shrimp" },
-  { image: strawberries, price: "$5", title: "Strawberries Arnaud" },
-  { image: thaichicken, price: "$20", title: "Thai Chicekn" },
-  { image: pancakes, price: "$10", title: "Pancakes" },
-  { image: waffles, price: "$5", title: "Waffles with Berries" },
-];
+// Default fallback image if product image is not provided or fails to load
+const DEFAULT_IMAGE = "/img/main.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Menu | By UM -XAIR" },
-      { name: "description", content: "BiteZone food menu." },
-      { property: "og:title", content: "Menu | By UM -XAIR" },
-      { property: "og:description", content: "BiteZone food menu." },
+      { title: "Menu | BiteZone & Silvassa Cakes" },
+      { name: "description", content: "Explore our delicious freshly baked cakes and gourmet dishes." },
+      { property: "og:title", content: "Menu | BiteZone & Silvassa Cakes" },
+      { property: "og:description", content: "Explore our delicious freshly baked cakes and gourmet dishes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -60,84 +33,141 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const cardsRef = useRef<HTMLDivElement>(null);
-  const [poster, setPoster] = useState(thaichicken);
-  const [title, setTitle] = useState("Thai Chicken");
-  const [price, setPrice] = useState("$38");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const selectDish = (dish: (typeof dishes)[number]) => {
-    setPoster(dish.image);
-    setTitle(dish.title);
-    setPrice(dish.price);
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: () => fetchProducts({ is_active: true }),
+  });
+
+  // When products are loaded, set the first product as selected if none is selected
+  useEffect(() => {
+    if (products.length > 0 && (!selectedProduct || !products.some((p) => p.id === selectedProduct.id))) {
+      setSelectedProduct(products[0] ?? null);
+    }
+  }, [products, selectedProduct]);
+
+  const activeProduct = selectedProduct || products[0] || null;
+  const currentPoster = activeProduct?.img_url || DEFAULT_IMAGE;
+  const currentTitle = activeProduct?.name || "Delicious Specialty";
+  const currentType = activeProduct?.type || "Fresh & Handcrafted";
+  const currentDesc =
+    activeProduct?.description?.trim() ||
+    "Experience the rich flavours and handcrafted delight made with the finest ingredients.";
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = DEFAULT_IMAGE;
   };
 
   return (
     <header>
       <div className="logo">
         <h1>BiteZone.</h1>
-        <img src={poster} alt="" id="poster" />
+        <img
+          src={currentPoster}
+          alt={currentTitle}
+          id="poster"
+          onError={handleImageError}
+        />
       </div>
-
-      {/* <nav>
-        <i className="bi menu bi-list"></i>
-        <div className="right_menu">
-          <ul>
-            <li><a href="#">Shop</a></li>
-            <li><a href="#">Features</a></li>
-            <li><a href="#">Recipes</a></li>
-            <li><a href="#">Hotlink</a></li>
-          </ul>
-          <div className="user_cart">
-            <i className="bi bi-cart-dash-fill"></i>
-            <div className="user">
-              <i className="bi bi-person-circle"></i>
-            </div>
-          </div>
-        </div>
-      </nav> */}
-      {/* 
-      <div className="left_menu">
-        <a href="#">Process</a>
-        <a href="#">Design</a>
-        <a href="#">Material</a>
-      </div> */}
 
       <section style={{ marginTop: "45px" }}>
         <div className="content">
-          <h1 id="title">{title}</h1>
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus praesentium distinctio a accusamus illum autem. Dicta maiores incidunt eum dolores!</p>
+          <h1 id="title">{currentTitle}</h1>
+          <p>{currentDesc}</p>
           <div className="price_order">
             <div className="price">
-              <h2 id="price_cont">{price}</h2>
-              <p>total payable</p>
+              <h2 id="price_cont">{currentType}</h2>
+              <p>Category</p>
             </div>
             <a href="tel:+919487255660">Enquiry Now</a>
           </div>
         </div>
 
         <div className="cards" style={{ marginLeft: "13px" }} ref={cardsRef}>
-          {dishes.map((dish) => (
-            <div className="card" key={dish.title} onClick={() => selectDish(dish)}>
-              <img src={dish.image} alt="" className="dis" />
-              <h4>{dish.price}</h4>
-              <h5>{dish.title}</h5>
-              <p>Per Plate</p>
-              <div className="rate_cart">
-                <h6>5.0</h6>
-                <i className="bi bi-cart-dash-fill"></i>
-              </div>
+          {isLoading ? (
+            <div style={{ color: "#fff", padding: "20px", fontSize: "14px" }}>
+              Loading menu products...
             </div>
-          ))}
+          ) : isError ? (
+            <div style={{ color: "#fff", padding: "10px", fontSize: "13px" }}>
+              <span>Failed to load products. </span>
+              <button
+                onClick={() => refetch()}
+                style={{
+                  background: "#4E9525",
+                  color: "#fff",
+                  border: "none",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          ) : products.length === 0 ? (
+            <div style={{ color: "#fff", padding: "20px", fontSize: "14px" }}>
+              No products found in menu.
+            </div>
+          ) : (
+            products.map((product) => {
+              const isSelected = activeProduct?.id === product.id;
+              const productImg = product.img_url || DEFAULT_IMAGE;
+
+              return (
+                <div
+                  className={`card ${isSelected ? "active" : ""}`}
+                  key={product.id}
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  <img
+                    src={productImg}
+                    alt={product.name}
+                    className="dis"
+                    onError={handleImageError}
+                  />
+                  <h4>{product.type ? product.type.slice(0, 10) : "Fresh"}</h4>
+                  <h5 title={product.name}>{product.name}</h5>
+                  <p>Special Item</p>
+                  <div className="rate_cart">
+                    <h6>5.0</h6>
+                    <i className="bi bi-cart-dash-fill"></i>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         <div className="social">
           <div className="btns">
-            <i className="bi bi-arrow-left-circle-fill" onClick={() => { if (cardsRef.current) cardsRef.current.scrollLeft -= 140; }}></i>
-            <i className="bi bi-arrow-right-circle-fill" onClick={() => { if (cardsRef.current) cardsRef.current.scrollLeft += 140; }}></i>
+            <i
+              className="bi bi-arrow-left-circle-fill"
+              onClick={() => {
+                if (cardsRef.current) cardsRef.current.scrollLeft -= 140;
+              }}
+              style={{ cursor: "pointer" }}
+            ></i>
+            <i
+              className="bi bi-arrow-right-circle-fill"
+              onClick={() => {
+                if (cardsRef.current) cardsRef.current.scrollLeft += 140;
+              }}
+              style={{ cursor: "pointer" }}
+            ></i>
           </div>
           <div className="icons">
-            {/* <a href="#"><i className="bi bi-facebook"></i></a> */}
-            <a href="#"><i className="bi bi-instagram"></i></a>
-            {/* <a href="#"><i className="bi bi-tiktok"></i></a> */}
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">
+              <i className="bi bi-instagram"></i>
+            </a>
           </div>
         </div>
       </section>
